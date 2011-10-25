@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS `attributes` (
   PRIMARY KEY (`idattributes`),
   KEY `fk_attributes_keys1` (`key_id`),
   KEY `fk_attributes_document1` (`doc_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=9 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS `document` (
   `key_id` bigint(20) NOT NULL,
   PRIMARY KEY (`iddocument`),
   KEY `fk_document_keys` (`key_id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=4 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS `keys` (
   `idkeys` bigint(20) NOT NULL AUTO_INCREMENT,
   `name` varchar(1024) DEFAULT NULL,
   PRIMARY KEY (`idkeys`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=23 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;
 
 --
 -- Constraints for dumped tables
@@ -73,3 +73,6 @@ ALTER TABLE `attributes`
 --
 ALTER TABLE `document`
   ADD CONSTRAINT `fk_document_keys` FOREIGN KEY (`key_id`) REFERENCES `keys` (`idkeys`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+
+-- Add the primary ID key as the default parameter
+INSERT INTO `keys` (`idkeys`, `name`) VALUES (NULL, 'id');
