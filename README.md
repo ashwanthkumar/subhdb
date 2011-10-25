@@ -4,7 +4,7 @@ SubhDB
 NoSQL datastore for MySQL and PHP. 
 
 Installation Steps
--------------------
+------------------
 
 * Create a database called subhdb
 
@@ -13,3 +13,11 @@ Installation Steps
 * Update the MySQL settings in src/config.php
 
 * Check out tests/post.sample.php and tests/get.sample.php to post and retrive documents. 
+
+TODO
+----
+* Create a web interface to browse the data store (with add/remove/edit options)
+
+* Implement some client libs to access the datastore
+
+* Benchmark it against other datastores to test it against the production environment
