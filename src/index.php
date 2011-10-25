@@ -69,8 +69,6 @@
 				$db->insert("document", array("url" => $request_uri, "key_id" => $documentId));
 				$documentPK = $db->lastInsertId();
 				
-				echo "Document with $documentPK added.";
-				
 				// Adding the ID value attribute to the document
 				if(isset($vars["id"])) {
 					$documentIdValue = $vars["id"];
@@ -78,8 +76,6 @@
 					$documentIdValue = $documentPK;
 				}
 				$db->insert("attributes", array("value" => $documentIdValue, "key_id" => $documentId, "doc_id" => $documentPK));
-				
-				echo "ID Attribue with value $documentIdValue has been added to the document_id = $documentPK. ";
 				
 				// Iterating over the Attributes of the document to store the keys if not found in the datastore
 				while($v = current($vars)) {
@@ -95,8 +91,6 @@
 						// Key does not exist, add it as a reference and get its PK
 						$db->insert("`keys`", array("name" => key($vars)));
 						$keyRef = $db->lastInsertId();
-						
-						echo "Key (" . key($vars) . ") was added to the system. ";
 					}
 					
 					// Get the Document Key as Id
@@ -104,17 +98,13 @@
 						// Just skip this part, as its already added
 					} else {
 						$db->insert("attributes", array("value" => $v, "key_id" => $keyRef, "doc_id" => $documentPK));
-						echo "Attribute " . key($vars) . " with value $v was added to the system. ";
 					}
 					
 					// Iterate to next attribute
 					next($vars);
 				}
 				
-				// Reset the internal pointer of the array
-				reset($vars);
-				
-				
+				emit(array("status" => true, "message" => "Document added with ID " . $documentPK));
 			} else {
 				emit(array("status" => false, "message" => "No valid document was posted with the request.", "error_code" => 1));
 			}
