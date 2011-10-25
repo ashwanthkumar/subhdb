@@ -14,8 +14,8 @@ Installation Steps
 
 * Check out tests/post.sample.php and tests/get.sample.php to post and retrive documents. 
 
-TODO
-----
+TODOs
+-----
 * Create a web interface to browse the data store (with add/remove/edit options)
 
 * Implement some client libs to access the datastore
