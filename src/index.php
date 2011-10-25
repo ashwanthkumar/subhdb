@@ -50,38 +50,54 @@
 				$jsonObject = json_decode($document);
 				$vars = get_object_vars($jsonObject);
 				
-				// Set the documentId Key
-				$documentId = null;
-				$documentIdValue = null;
+				// Check if there exist another document with the same ID and same URL(Namespace)
+				$goCommand = false;
+				
+				if(!isset($vars["id"])) $goCommand = true;
+				else {
+					// Contains an ID value, Check it agains the datastore
+					$doc = $db->run("select * from `document` d,`keys` k, `attributes` a where a.doc_id = d.iddocument and d.url = :url and k.idkeys = d.key_id and a.value = :id group by d.iddocument", array(":id" => $vars["id"], ":url" => $request_uri));
+					
+					// Issue GO only when the document count is < 1 (ie) 0
+					if(count($doc) < 1) $goCommand = true;
+				}
+				
+				if($goCommand) {
+					// Set the documentId Key
+					$documentId = null;
+					$documentIdValue = null;
 
-				// Checking if the ID attribute exist in the keys table
-				$k = $db->select("`keys`", "name = :name", array(":name" => "id"));
-				if(count($k) > 0) {
-					// Get the PK of the "id" Key
-					$documentId = $k[0]["idkeys"];
-				} else {
-					// Key does not exist, add it as a reference and get its PK
-					$db->insert("`keys`", array("name" => "id"));
-					$documentId = $db->lastInsertId();
+					// Checking if the ID attribute exist in the keys table
+					$k = $db->select("`keys`", "name = :name", array(":name" => "id"));
+					if(count($k) > 0) {
+						// Get the PK of the "id" Key
+						$documentId = $k[0]["idkeys"];
+					} else {
+						// Key does not exist, add it as a reference and get its PK
+						$db->insert("`keys`", array("name" => "id"));
+						$documentId = $db->lastInsertId();
+					}
+					
+					// Creating the document
+					$db->insert("document", array("url" => $request_uri, "key_id" => $documentId));
+					$documentPK = $db->lastInsertId();
+					
+					// Helps recursively add all the attributes to the datastore for the given document
+					addKeysToIndex($vars, $documentPK, -1);
+					
+					// Adding the ID value attribute to the document
+					if(isset($vars["id"])) {
+						// If the id value is present it would be added by now in the addKeysToIndex() so, we're going to just ignore and hope the function completed successfully. Krshna!
+						$documentIdValue = $vars["id"];
+					} else {
+						$documentIdValue = $documentPK;
+						$db->insert("attributes", array("value" => $documentIdValue, "key_id" => $documentId, "doc_id" => $documentPK));
+					}
+					
+					emit(array("status" => true, "message" => "Document added with ID " . $documentIdValue, "doc_id" => $documentIdValue));
+				} else{
+					emit(array("status" => false, "message" => "Another document exist in the same scope, please choose another ID for the document and try again.", "error_code" => 2));
 				}
-				
-				// Creating the document
-				$db->insert("document", array("url" => $request_uri, "key_id" => $documentId));
-				$documentPK = $db->lastInsertId();
-				
-				// Helps recursively add all the attributes to the datastore for the given document
-				addKeysToIndex($vars, $documentPK, -1);
-				
-				// Adding the ID value attribute to the document
-				if(isset($vars["id"])) {
-					// If the id value is present it would be added by now in the addKeysToIndex() so, we're going to just ignore and hope the function completed successfully. Krshna!
-					$documentIdValue = $vars["id"];
-				} else {
-					$documentIdValue = $documentPK;
-					$db->insert("attributes", array("value" => $documentIdValue, "key_id" => $documentId, "doc_id" => $documentPK));
-				}
-				
-				emit(array("status" => true, "message" => "Document added with ID " . $documentIdValue, "doc_id" => $documentIdValue));
 			} else {
 				emit(array("status" => false, "message" => "No valid document was posted with the request.", "error_code" => 1));
 			}

@@ -22,4 +22,5 @@
 	//close connection
 	curl_close($ch);
 	
+	header("Content-type: application/json");
 	echo $result;
