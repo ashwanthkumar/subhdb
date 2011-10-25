@@ -69,42 +69,19 @@
 				$db->insert("document", array("url" => $request_uri, "key_id" => $documentId));
 				$documentPK = $db->lastInsertId();
 				
+				// Helps recursively add all the attributes to the datastore for the given document
+				addKeysToIndex($vars, $documentPK, -1);
+				
 				// Adding the ID value attribute to the document
 				if(isset($vars["id"])) {
+					// If the id value is present it would be added by now in the addKeysToIndex() so, we're going to just ignore and hope the function completed successfully. Krshna!
 					$documentIdValue = $vars["id"];
 				} else {
 					$documentIdValue = $documentPK;
-				}
-				$db->insert("attributes", array("value" => $documentIdValue, "key_id" => $documentId, "doc_id" => $documentPK));
-				
-				// Iterating over the Attributes of the document to store the keys if not found in the datastore
-				while($v = current($vars)) {
-					// Checking if the key for the variable exist already
-					$k = $db->select("`keys`", "name = :name", array(":name" => key($vars)));
-
-					$keyRef = -1;
-					// echo key($vars) . " - " . count($k) . "\n";
-					if(count($k) > 0) {	
-						// Key exist, just get its PK
-						$keyRef = $k[0]["idkeys"];
-					} else {
-						// Key does not exist, add it as a reference and get its PK
-						$db->insert("`keys`", array("name" => key($vars)));
-						$keyRef = $db->lastInsertId();
-					}
-					
-					// Get the Document Key as Id
-					if(key($vars) === "id") {
-						// Just skip this part, as its already added
-					} else {
-						$db->insert("attributes", array("value" => $v, "key_id" => $keyRef, "doc_id" => $documentPK));
-					}
-					
-					// Iterate to next attribute
-					next($vars);
+					$db->insert("attributes", array("value" => $documentIdValue, "key_id" => $documentId, "doc_id" => $documentPK));
 				}
 				
-				emit(array("status" => true, "message" => "Document added with ID " . $documentPK));
+				emit(array("status" => true, "message" => "Document added with ID " . $documentIdValue, "doc_id" => $documentIdValue));
 			} else {
 				emit(array("status" => false, "message" => "No valid document was posted with the request.", "error_code" => 1));
 			}

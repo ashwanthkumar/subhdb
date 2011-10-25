@@ -6,7 +6,7 @@
 	
 	// Change this URL to change it accordingly
 	$url_to_post = "http://127.0.1.1/subhdb/src/posts/";
-	$jsonDoc = json_encode(array("id" => 5, "content" => "Another sample test content goes here", "author" => "Ashwanth", "time" => time()));
+	$jsonDoc = json_encode(array("id" => 5, "content" => "Another sample test content goes here", "author" => "Ashwanth", "time" => time(), "tags" => array("hacker", "developer")));
 	
 	$ch = curl_init();
 
